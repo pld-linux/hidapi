@@ -2,12 +2,12 @@
 # Conditional build:
 %bcond_without	apidocs		# do not build and package API docs
 %bcond_with	hidraw		# Linux 3 HIDRAW interface instead of libusb
-#
+
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
 Version:	0.7.0
-Release:	1
+Release:	2
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
 Source0:	https://github.com/signal11/hidapi/archive/%{name}-%{version}.tar.gz
@@ -26,7 +26,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 HIDAPI is a multi-platform library which allows an application to
 interface with USB and Bluetooth HID-Class (Human Interface Device)
-devices on Windows, Linux, and Mac OS X. 
+devices on Windows, Linux, and Mac OS X.
 
 %description -l pl.UTF-8
 HIDAPI to wieloplatformowa biblioteka pozwalająca aplikacjom
@@ -64,6 +64,9 @@ Statyczna biblioteka HIDAPI.
 Summary:	HIDAPI API documentation
 Summary(pl.UTF-8):	Dokumentacja API biblioteki HIDAPI
 Group:		Documentation
+%if "%{_rpmversion}" >= "5"
+BuildArch:	noarch
+%endif
 
 %description apidocs
 API documentation for HIDAPI library.
