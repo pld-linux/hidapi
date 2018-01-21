@@ -1,26 +1,24 @@
 #
 # Conditional build:
 %bcond_without	apidocs		# do not build and package API docs
-%bcond_with	hidraw		# Linux 3 HIDRAW interface instead of libusb
+
+%define		snap	20180121
+%define		commit	a6a622ffb680c55da0de787ff93b80280498330f
 
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
-Version:	0.7.0
-Release:	2
+Version:	0.8.0
+Release:	0.%{snap}.1
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
-Source0:	https://github.com/signal11/hidapi/archive/%{name}-%{version}.tar.gz
-# Source0-md5:	5a0fa9e57960371942e6c3be2f988064
+Source0:	https://github.com/signal11/hidapi/archive/%{commit}/%{name}-%{version}.tar.gz
+# Source0-md5:	dfbec50a01bf8c45cce003293648013e
 URL:		https://github.com/signal11/hidapi/
 %{?with_apidocs:BuildRequires:	doxygen}
 BuildRequires:	libtool
-%if %{with hidraw}
-BuildRequires:	linux-libc-headers >= 7:2.6.39
-%else
 BuildRequires:	libusb-devel >= 1.0
 BuildRequires:	pkgconfig
-%endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -38,9 +36,7 @@ Summary:	Header file for HIDAPI library
 Summary(pl.UTF-8):	Plik nagłówkowy biblioteki HIDAPI
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-%if %{without hidraw}
 Requires:	libusb-devel >= 1.0
-%endif
 
 %description devel
 Header file for HIDAPI library.
@@ -75,23 +71,19 @@ API documentation for HIDAPI library.
 Dokumentacja API biblioteki HIDAPI.
 
 %prep
-%setup -q -n %{name}-%{name}-%{version}
+%setup -q -n %{name}-%{commit}
 
 cp linux/README.txt README-linux.txt
 
 %build
-cd linux
-%if %{with hidraw}
-libtool --mode=compile --tag=CC %{__cc} %{rpmcflags} %{rpmcppflags} -c hid.c -o hid.lo -I../hidapi
-OBJS=hid.lo
-LIBS=
-%else
-libtool --mode=compile --tag=CC %{__cc} %{rpmcflags} %{rpmcppflags} -c hid-libusb.c -o hid-libusb.lo -I../hidapi $(pkg-config --cflags libusb-1.0)
-OBJS=hid-libusb.lo
-LIBS="$(pkg-config --libs libusb-1.0)"
-%endif
-libtool --mode=link --tag=CC %{__cc} %{rpmldflags} %{rpmcflags} -o libhidapi.la $OBJS $LIBS -rpath %{_libdir}
-cd ..
+%{__aclocal}
+%{__autoconf}
+%{__autoheader}
+%{__libtoolize}
+%{__automake}
+%configure \
+	--disable-silent-rules
+%{__make}
 
 %if %{with apidocs}
 cd doxygen
@@ -101,10 +93,9 @@ cd ..
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_includedir},%{_libdir}}
 
-libtool --mode=install install linux/libhidapi.la $RPM_BUILD_ROOT%{_libdir}
-cp -p hidapi/hidapi.h $RPM_BUILD_ROOT%{_includedir}
+%{__make} install \
+	DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -116,18 +107,25 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 # included hid.rules as doc only - it uses e.g. MODE="0666", so requires some adjustments at least for stricter permissions
 %doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.txt README-linux.txt udev/99-hid.rules
-%attr(755,root,root) %{_libdir}/libhidapi.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libhidapi.so.0
+%attr(755,root,root) %{_libdir}/libhidapi-hidraw.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libhidapi-hidraw.so.0
+%attr(755,root,root) %{_libdir}/libhidapi-libusb.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libhidapi-libusb.so.0
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libhidapi.so
-%{_libdir}/libhidapi.la
-%{_includedir}/hidapi.h
+%attr(755,root,root) %{_libdir}/libhidapi-hidraw.so
+%attr(755,root,root) %{_libdir}/libhidapi-libusb.so
+%{_libdir}/libhidapi-hidraw.la
+%{_libdir}/libhidapi-libusb.la
+%{_includedir}/hidapi
+%{_pkgconfigdir}/hidapi-hidraw.pc
+%{_pkgconfigdir}/hidapi-libusb.pc
 
 %files static
 %defattr(644,root,root,755)
-%{_libdir}/libhidapi.a
+%{_libdir}/libhidapi-hidraw.a
+%{_libdir}/libhidapi-libusb.a
 
 %if %{with apidocs}
 %files apidocs
