@@ -14,11 +14,18 @@ License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
 Source0:	https://github.com/signal11/hidapi/archive/%{commit}/%{name}-%{version}.tar.gz
 # Source0-md5:	dfbec50a01bf8c45cce003293648013e
-URL:		https://github.com/signal11/hidapi/
+Patch0:		%{name}-sh.patch
+URL:		http://www.signal11.us/oss/hidapi/
+BuildRequires:	autoconf >= 2.63
+BuildRequires:	automake
 %{?with_apidocs:BuildRequires:	doxygen}
-BuildRequires:	libtool
-BuildRequires:	libusb-devel >= 1.0
+BuildRequires:	libtool >= 2:2
+BuildRequires:	libusb-devel >= 1.0.9
+# HIDRAW interface
+BuildRequires:	linux-libc-headers >= 7:2.6.39
 BuildRequires:	pkgconfig
+BuildRequires:	udev-devel
+Requires:	libusb >= 1.0.9
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -36,7 +43,7 @@ Summary:	Header file for HIDAPI library
 Summary(pl.UTF-8):	Plik nagłówkowy biblioteki HIDAPI
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	libusb-devel >= 1.0
+Requires:	libusb-devel >= 1.0.9
 
 %description devel
 Header file for HIDAPI library.
@@ -72,14 +79,15 @@ Dokumentacja API biblioteki HIDAPI.
 
 %prep
 %setup -q -n %{name}-%{commit}
+%patch0 -p1
 
-cp linux/README.txt README-linux.txt
+cp -p linux/README.txt README-linux.txt
 
 %build
-%{__aclocal}
+%{__libtoolize}
+%{__aclocal} -I m4
 %{__autoconf}
 %{__autoheader}
-%{__libtoolize}
 %{__automake}
 %configure \
 	--disable-silent-rules
@@ -96,6 +104,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+# packaged as %doc
+%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/hidapi
 
 %clean
 rm -rf $RPM_BUILD_ROOT
