@@ -1,21 +1,18 @@
 #
 # Conditional build:
-%bcond_without	apidocs		# do not build and package API docs
-
-%define		snap	20180121
-%define		commit	a6a622ffb680c55da0de787ff93b80280498330f
+%bcond_without	apidocs		# API documentation
 
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
-Version:	0.8.0
-Release:	0.%{snap}.1
+Version:	0.9.0
+Release:	1
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
-Source0:	https://github.com/signal11/hidapi/archive/%{commit}/%{name}-%{version}.tar.gz
-# Source0-md5:	dfbec50a01bf8c45cce003293648013e
-Patch0:		%{name}-sh.patch
-URL:		http://www.signal11.us/oss/hidapi/
+#Source0Download: https://github.com/libusb/hidapi/releases
+Source0:	https://github.com/libusb/hidapi/archive/%{name}-%{version}/%{name}-%{version}.tar.gz
+# Source0-md5:	a6bafd1bc5b74d411b77e0a90f601aed
+URL:		https://github.com/libusb/hidapi
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
 %{?with_apidocs:BuildRequires:	doxygen}
@@ -67,7 +64,7 @@ Statyczna biblioteka HIDAPI.
 Summary:	HIDAPI API documentation
 Summary(pl.UTF-8):	Dokumentacja API biblioteki HIDAPI
 Group:		Documentation
-%if "%{_rpmversion}" >= "5"
+%if "%{_rpmversion}" >= "4.6"
 BuildArch:	noarch
 %endif
 
@@ -78,8 +75,7 @@ API documentation for HIDAPI library.
 Dokumentacja API biblioteki HIDAPI.
 
 %prep
-%setup -q -n %{name}-%{commit}
-%patch0 -p1
+%setup -q -n %{name}-%{name}-%{version}
 
 cp -p linux/README.txt README-linux.txt
 
@@ -105,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+# obsoleted by pkg-config
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libhidapi-*.la
+
 # packaged as %doc
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/hidapi
 
@@ -117,7 +116,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 # included hid.rules as doc only - it uses e.g. MODE="0666", so requires some adjustments at least for stricter permissions
-%doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.txt README-linux.txt udev/99-hid.rules
+%doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.md README-linux.txt udev/99-hid.rules
 %attr(755,root,root) %{_libdir}/libhidapi-hidraw.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libhidapi-hidraw.so.0
 %attr(755,root,root) %{_libdir}/libhidapi-libusb.so.*.*.*
@@ -127,8 +126,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libhidapi-hidraw.so
 %attr(755,root,root) %{_libdir}/libhidapi-libusb.so
-%{_libdir}/libhidapi-hidraw.la
-%{_libdir}/libhidapi-libusb.la
 %{_includedir}/hidapi
 %{_pkgconfigdir}/hidapi-hidraw.pc
 %{_pkgconfigdir}/hidapi-libusb.pc
