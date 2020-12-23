@@ -5,13 +5,13 @@
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
-Version:	0.9.0
+Version:	0.10.1
 Release:	1
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
 #Source0Download: https://github.com/libusb/hidapi/releases
 Source0:	https://github.com/libusb/hidapi/archive/%{name}-%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	a6bafd1bc5b74d411b77e0a90f601aed
+# Source0-md5:	12dd792b3dbdfd5c875c3d8b0527cb79
 URL:		https://github.com/libusb/hidapi
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -21,6 +21,7 @@ BuildRequires:	libusb-devel >= 1.0.9
 # HIDRAW interface
 BuildRequires:	linux-libc-headers >= 7:2.6.39
 BuildRequires:	pkgconfig
+BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	udev-devel
 Requires:	libusb >= 1.0.9
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -64,9 +65,7 @@ Statyczna biblioteka HIDAPI.
 Summary:	HIDAPI API documentation
 Summary(pl.UTF-8):	Dokumentacja API biblioteki HIDAPI
 Group:		Documentation
-%if "%{_rpmversion}" >= "4.6"
-BuildArch:	noarch
-%endif
+%{?noarchpackage}
 
 %description apidocs
 API documentation for HIDAPI library.
@@ -76,8 +75,6 @@ Dokumentacja API biblioteki HIDAPI.
 
 %prep
 %setup -q -n %{name}-%{name}-%{version}
-
-cp -p linux/README.txt README-linux.txt
 
 %build
 %{__libtoolize}
@@ -116,7 +113,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 # included hid.rules as doc only - it uses e.g. MODE="0666", so requires some adjustments at least for stricter permissions
-%doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.md README-linux.txt udev/99-hid.rules
+%doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.md udev/99-hid.rules
 %attr(755,root,root) %{_libdir}/libhidapi-hidraw.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libhidapi-hidraw.so.0
 %attr(755,root,root) %{_libdir}/libhidapi-libusb.so.*.*.*
