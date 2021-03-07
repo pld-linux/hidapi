@@ -65,7 +65,7 @@ Statyczna biblioteka HIDAPI.
 Summary:	HIDAPI API documentation
 Summary(pl.UTF-8):	Dokumentacja API biblioteki HIDAPI
 Group:		Documentation
-%{?noarchpackage}
+BuildArch:	noarch
 
 %description apidocs
 API documentation for HIDAPI library.
