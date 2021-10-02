@@ -5,18 +5,16 @@
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
-Version:	0.10.1
+Version:	0.11.0
 Release:	1
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
 #Source0Download: https://github.com/libusb/hidapi/releases
 Source0:	https://github.com/libusb/hidapi/archive/%{name}-%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	12dd792b3dbdfd5c875c3d8b0527cb79
+# Source0-md5:	bef8e68c132f42128d10f2f23f8a5daa
 URL:		https://github.com/libusb/hidapi
-BuildRequires:	autoconf >= 2.63
-BuildRequires:	automake
+BuildRequires:	cmake >= 3.1.3
 %{?with_apidocs:BuildRequires:	doxygen}
-BuildRequires:	libtool >= 2:2
 BuildRequires:	libusb-devel >= 1.0.9
 # HIDRAW interface
 BuildRequires:	linux-libc-headers >= 7:2.6.39
@@ -42,24 +40,13 @@ Summary(pl.UTF-8):	Plik nagłówkowy biblioteki HIDAPI
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	libusb-devel >= 1.0.9
+Obsoletes:	hidapi-static < 0.11.0
 
 %description devel
 Header file for HIDAPI library.
 
 %description devel -l pl.UTF-8
 Plik nagłówkowy biblioteki HIDAPI.
-
-%package static
-Summary:	Static HIDAPI library
-Summary(pl.UTF-8):	Statyczna biblioteka HIDAPI
-Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
-
-%description static
-Static HIDAPI library.
-
-%description static -l pl.UTF-8
-Statyczna biblioteka HIDAPI.
 
 %package apidocs
 Summary:	HIDAPI API documentation
@@ -77,14 +64,8 @@ Dokumentacja API biblioteki HIDAPI.
 %setup -q -n %{name}-%{name}-%{version}
 
 %build
-%{__libtoolize}
-%{__aclocal} -I m4
-%{__autoconf}
-%{__autoheader}
-%{__automake}
-%configure \
-	--disable-silent-rules
-%{__make}
+%cmake -B build
+%{__make} -C build
 
 %if %{with apidocs}
 cd doxygen
@@ -95,14 +76,10 @@ cd ..
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# obsoleted by pkg-config
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/libhidapi-*.la
-
-# packaged as %doc
-%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/hidapi
+install -D udev/69-hid.rules $RPM_BUILD_ROOT/lib/udev/rules.d/69-hid.rules
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -112,12 +89,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-# included hid.rules as doc only - it uses e.g. MODE="0666", so requires some adjustments at least for stricter permissions
-%doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.md udev/99-hid.rules
+%doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.md
 %attr(755,root,root) %{_libdir}/libhidapi-hidraw.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libhidapi-hidraw.so.0
 %attr(755,root,root) %{_libdir}/libhidapi-libusb.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libhidapi-libusb.so.0
+/lib/udev/rules.d/69-hid.rules
 
 %files devel
 %defattr(644,root,root,755)
@@ -126,11 +103,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/hidapi
 %{_pkgconfigdir}/hidapi-hidraw.pc
 %{_pkgconfigdir}/hidapi-libusb.pc
-
-%files static
-%defattr(644,root,root,755)
-%{_libdir}/libhidapi-hidraw.a
-%{_libdir}/libhidapi-libusb.a
+%{_libdir}/cmake/hidapi
 
 %if %{with apidocs}
 %files apidocs
