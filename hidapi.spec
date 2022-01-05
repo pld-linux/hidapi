@@ -19,6 +19,7 @@ BuildRequires:	libusb-devel >= 1.0.9
 # HIDRAW interface
 BuildRequires:	linux-libc-headers >= 7:2.6.39
 BuildRequires:	pkgconfig
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	udev-devel
 Requires:	libusb >= 1.0.9
