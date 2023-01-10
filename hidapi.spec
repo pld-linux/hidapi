@@ -5,13 +5,13 @@
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
-Version:	0.12.0
+Version:	0.13.1
 Release:	1
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
 #Source0Download: https://github.com/libusb/hidapi/releases
 Source0:	https://github.com/libusb/hidapi/archive/%{name}-%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	d0e344f2c75aba08908ce26d3fb17d74
+# Source0-md5:	7783af65a26bad1be2c1f5fc28f0071f
 URL:		https://github.com/libusb/hidapi
 BuildRequires:	cmake >= 3.1.3
 %{?with_apidocs:BuildRequires:	doxygen}
