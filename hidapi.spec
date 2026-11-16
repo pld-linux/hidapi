@@ -5,13 +5,13 @@
 Summary:	HID API for Windows, Linux and Mac OS X
 Summary(pl.UTF-8):	API HID dla systemów Windows, Linux oraz Mac OS X
 Name:		hidapi
-Version:	0.15.0
+Version:	0.16.0
 Release:	1
 License:	GPL v3 or BSD or HIDAPI
 Group:		Libraries
 #Source0Download: https://github.com/libusb/hidapi/releases
 Source0:	https://github.com/libusb/hidapi/archive/%{name}-%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	0a91bba20cc9b6717341a723132238f3
+# Source0-md5:	b09389a7042b7c1f39e18b785d0417b8
 URL:		https://github.com/libusb/hidapi
 BuildRequires:	cmake >= 3.13
 %{?with_apidocs:BuildRequires:	doxygen}
@@ -22,7 +22,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	udev-devel
-Requires:	libusb >= 1.0.9
+Requires:	libusb%{?_isa} >= 1.0.9
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -39,8 +39,8 @@ Interface Device) w systemach Windows, Linux oraz Mac OS X.
 Summary:	Header file for HIDAPI library
 Summary(pl.UTF-8):	Plik nagłówkowy biblioteki HIDAPI
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	libusb-devel >= 1.0.9
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+Requires:	libusb-devel%{?_isa} >= 1.0.9
 Obsoletes:	hidapi-static < 0.11.0
 
 %description devel
@@ -66,6 +66,7 @@ Dokumentacja API biblioteki HIDAPI.
 
 %build
 %cmake -B build
+
 %{__make} -C build
 
 %if %{with apidocs}
@@ -80,7 +81,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -D udev/69-hid.rules $RPM_BUILD_ROOT/lib/udev/rules.d/69-hid.rules
+install -Dp udev/69-hid.rules $RPM_BUILD_ROOT/lib/udev/rules.d/69-hid.rules
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -91,17 +92,18 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc AUTHORS.txt LICENSE.txt LICENSE-bsd.txt LICENSE-orig.txt README.md
-%attr(755,root,root) %{_libdir}/libhidapi-hidraw.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libhidapi-hidraw.so.0
-%attr(755,root,root) %{_libdir}/libhidapi-libusb.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libhidapi-libusb.so.0
+%{_libdir}/libhidapi-hidraw.so.*.*.*
+%ghost %{_libdir}/libhidapi-hidraw.so.0
+%{_libdir}/libhidapi-libusb.so.*.*.*
+%ghost %{_libdir}/libhidapi-libusb.so.0
 /lib/udev/rules.d/69-hid.rules
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libhidapi-hidraw.so
-%attr(755,root,root) %{_libdir}/libhidapi-libusb.so
+%{_libdir}/libhidapi-hidraw.so
+%{_libdir}/libhidapi-libusb.so
 %{_includedir}/hidapi
+%{_pkgconfigdir}/hidapi.pc
 %{_pkgconfigdir}/hidapi-hidraw.pc
 %{_pkgconfigdir}/hidapi-libusb.pc
 %{_libdir}/cmake/hidapi
